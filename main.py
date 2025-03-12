@@ -3,6 +3,7 @@ import telebot
 from telebot import types
 import sqlite3
 import requests
+from random import *
 from bs4 import BeautifulSoup
 from config import TOKEN, StartText, UnCom, HelpText
 
@@ -15,6 +16,11 @@ def start(message):
         bot.send_message(message.chat.id, StartText)
     if message.text == '/help':
         bot.send_message(message.chat.id, HelpText)
+
+
+@bot.message_handler(commands=['aa'])
+def s(message):
+    pass
 
 
 @bot.message_handler(commands=['randomfood'])
@@ -113,11 +119,23 @@ def on_click2(message):
     bot.send_photo(message.chat.id, photo=open(f'assets/{result[5]}', 'rb'), caption=x, reply_markup=mk)
 
 
+@bot.message_handler(commands=['motivation'])
+def motivation(message):
+    con = sqlite3.connect('webproject')
+    cur = con.cursor()
+    s = randint(1, 3)
+    result = cur.execute(f"""SELECT * FROM motivation
+                                    WHERE id = '{s}'""").fetchone()
+    result = list(result)
+    bot.send_video(message.chat.id, video=open(f'assets/{result[1]}.mp4', 'rb'))
+
+
 @bot.message_handler()
 def text(message):
     if message.entities != None:
         if message.entities[0].type == 'bot_command':
-            bot.send_message(message.chat.id, UnCom, parse_mode='HTML')
+            mk = types.ReplyKeyboardRemove()
+            bot.send_message(message.chat.id, UnCom, parse_mode='HTML', reply_markup=mk)
 
 
 bot.infinity_polling()
